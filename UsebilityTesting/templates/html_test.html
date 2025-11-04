@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}HTML File Testing - Usability Testing Tool{% endblock %}
+
+{% block header %}HTML File Testing{% endblock %}
+
+{% block content %}
+<div class="bg-white shadow overflow-hidden sm:rounded-lg slide-in">
+    <div class="px-4 py-5 sm:px-6">
+        <h2 class="text-lg leading-6 font-medium text-gray-900">
+            Test HTML Files
+        </h2>
+        <p class="mt-1 max-w-2xl text-sm text-gray-500 fade-in">
+            Upload an HTML file to test for usability issues.
+        </p>
+    </div>
+    <div class="border-t border-gray-200 px-4 py-5 sm:p-6">
+        <form method="POST" action="{{ url_for('html_test') }}" enctype="multipart/form-data">
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">HTML File</label>
+                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md transition-all">
+                        <div class="space-y-1 text-center">
+                            <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                            <div class="flex text-sm text-gray-600">
+                                <label for="html_file" class="relative cursor-pointer bg-white rounded-md font-medium text-primary hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-primary transition-all">
+                                    <span>Upload a file</span>
+                                    <input id="html_file" name="html_file" type="file" class="sr-only" accept=".html,.htm" required>
+                                </label>
+                                <p class="pl-1">or drag and drop</p>
+                            </div>
+                            <p class="text-xs text-gray-500">
+                                HTML files only (.html, .htm)
+                            </p>
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <p id="file-name" class="text-sm text-gray-500 fade-in"></p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-6">
+                <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all" data-tooltip="Run usability tests on the HTML file">
+                    Start Testing
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize tooltips
+        tippy('[data-tooltip]', {
+            content: function(reference) {
+                return reference.getAttribute('data-tooltip');
+            },
+            animation: 'scale',
+            placement: 'top',
+            arrow: true
+        });
+        
+        document.getElementById('html_file').addEventListener('change', function(e) {
+            const fileName = e.target.files[0].name;
+            const fileNameElement = document.getElementById('file-name');
+            fileNameElement.textContent = `Selected file: ${fileName}`;
+            fileNameElement.classList.add('text-green-500');
+            fileNameElement.classList.remove('text-gray-500');
+        });
+    });
+    
+    // Drag and drop functionality
+    const dropArea = document.querySelector('.border-dashed');
+    const fileInput = document.getElementById('html_file');
+    
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, preventDefaults, false);
+    });
+    
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropArea.addEventListener(eventName, highlight, false);
+    });
+    
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, unhighlight, false);
+    });
+    
+    function highlight() {
+        dropArea.classList.add('border-primary', 'bg-blue-50');
+        dropArea.classList.remove('border-gray-300');
+    }
+    
+    function unhighlight() {
+        dropArea.classList.remove('border-primary', 'bg-blue-50');
+        dropArea.classList.add('border-gray-300');
+    }
+    
+    dropArea.addEventListener('drop', handleDrop, false);
+    
+    function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        
+        if (files.length > 0) {
+            fileInput.files = files;
+            const fileName = files[0].name;
+            const fileNameElement = document.getElementById('file-name');
+            fileNameElement.textContent = `Selected file: ${fileName}`;
+            fileNameElement.classList.add('text-green-500');
+            fileNameElement.classList.remove('text-gray-500');
+        }
+    }
+</script>
+{% endblock %}

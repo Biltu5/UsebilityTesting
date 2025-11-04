@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block title %}URL Testing - Usability Testing Tool{% endblock %}
+
+{% block header %}URL Testing{% endblock %}
+
+{% block content %}
+<div class="bg-white shadow overflow-hidden sm:rounded-lg slide-in">
+    <div class="px-4 py-5 sm:px-6">
+        <h2 class="text-lg leading-6 font-medium text-gray-900">
+            Test Website URLs
+        </h2>
+        <p class="mt-1 max-w-2xl text-sm text-gray-500">
+            Enter the URLs you want to test for usability issues.
+        </p>
+    </div>
+    <div class="border-t border-gray-200 px-4 py-5 sm:p-6">
+        <form method="POST" action="{{ url_for('url_test') }}">
+            <div class="space-y-4" id="url-inputs">
+                <div class="flex items-center">
+                    <div class="flex-grow">
+                        <label for="url-1" class="block text-sm font-medium text-gray-700">URL 1</label>
+                        <input type="text" name="urls" id="url-1" class="mt-1 focus:ring-primary focus:border-primary block w-full shadow-sm sm:text-sm border-gray-300 rounded-md p-3 transition-all" placeholder="google.com" required>
+                    </div>
+                    <div class="ml-3 mt-6">
+                        <button type="button" onclick="removeUrlField(this)" class="inline-flex items-center p-2 border border-transparent rounded-full shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all" style="display: none;" data-tooltip="Remove this URL">
+                            <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-4">
+                <button type="button" id="add-url" class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all" data-tooltip="Add another URL to test">
+                    <svg class="-ml-0.5 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Add Another URL
+                </button>
+            </div>
+            
+            <div class="mt-6">
+                <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all" data-tooltip="Run usability tests on all URLs">
+                    Start Testing
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    let urlCount = 1;
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize tooltips
+        initTooltips();
+        
+        // Add input validation for URL fields
+        document.querySelectorAll('input[name="urls"]').forEach(input => {
+            input.addEventListener('blur', validateUrlInput);
+        });
+    });
+    
+    document.getElementById('add-url').addEventListener('click', function() {
+        urlCount++;
+        const urlInputs = document.getElementById('url-inputs');
+        
+        const newUrlField = document.createElement('div');
+        newUrlField.className = 'flex items-center fade-in';
+        newUrlField.innerHTML = `
+            <div class="flex-grow">
+                <label for="url-${urlCount}" class="block text-sm font-medium text-gray-700">URL ${urlCount}</label>
+                <input type="text" name="urls" id="url-${urlCount}" class="mt-1 focus:ring-primary focus:border-primary block w-full shadow-sm sm:text-sm border-gray-300 rounded-md p-3 transition-all" placeholder="google.com">
+            </div>
+            <div class="ml-3 mt-6">
+                <button type="button" onclick="removeUrlField(this)" class="inline-flex items-center p-2 border border-transparent rounded-full shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all" data-tooltip="Remove this URL">
+                    <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+        `;
+        
+        urlInputs.appendChild(newUrlField);
+        
+        // Add validation to the new input
+        document.getElementById(`url-${urlCount}`).addEventListener('blur', validateUrlInput);
+        
+        // Show remove button for the first URL if we have more than one URL
+        if (urlCount === 2) {
+            document.querySelector('#url-inputs .flex:first-child button').style.display = 'inline-flex';
+        }
+        
+        // Initialize tooltips for new elements
+        initTooltips();
+    });
+    
+    // Add URL validation function
+    function validateUrlInput(e) {
+        const input = e.target;
+        const value = input.value.trim();
+        
+        if (value && !value.includes('://')) {
+            // Add https:// prefix automatically if missing
+            input.value = 'https://' + value;
+        }
+    }
+    
+    function removeUrlField(button) {
+        const fieldContainer = button.closest('.flex');
+        fieldContainer.classList.add('fade-out');
+        
+        // Add a small delay before removing the element to allow animation to complete
+        setTimeout(() => {
+            fieldContainer.remove();
+            
+            urlCount--;
+            
+            // Update labels
+            const labels = document.querySelectorAll('#url-inputs label');
+            const inputs = document.querySelectorAll('#url-inputs input');
+            
+            for (let i = 0; i < labels.length; i++) {
+                labels[i].textContent = `URL ${i+1}`;
+                labels[i].setAttribute('for', `url-${i+1}`);
+                inputs[i].setAttribute('id', `url-${i+1}`);
+            }
+            
+            // Hide remove button for the first URL if we only have one URL
+            if (urlCount === 1) {
+                document.querySelector('#url-inputs .flex:first-child button').style.display = 'none';
+            }
+        }, 300);
+    }
+    
+    // Initialize tooltips function
+    function initTooltips() {
+        tippy('[data-tooltip]', {
+            content: function(reference) {
+                return reference.getAttribute('data-tooltip');
+            },
+            animation: 'scale',
+            placement: 'top',
+            arrow: true
+        });
+    }
+</script>
+{% endblock %}

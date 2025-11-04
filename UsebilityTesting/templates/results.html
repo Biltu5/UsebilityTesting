@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block title %}Test Results - Usability Testing Tool{% endblock %}
+
+{% block header %}Test Results{% endblock %}
+
+{% block content %}
+<div class="bg-white shadow overflow-hidden sm:rounded-lg mb-6">
+    <div class="px-4 py-5 sm:px-6 flex justify-between items-center">
+        <div>
+            <h2 class="text-lg leading-6 font-medium text-gray-900">
+                Usability Test Results
+            </h2>
+            <p class="mt-1 max-w-2xl text-sm text-gray-500">
+                Summary of detected issues and recommendations.
+            </p>
+        </div>
+        <div>
+            <a href="{{ url_for('download_report', report_id=report_id) }}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                Download PDF Report
+            </a>
+        </div>
+    </div>
+    
+    <!-- Summary Stats -->
+    <div class="border-t border-gray-200 px-4 py-5 sm:p-6">
+        <dl class="grid grid-cols-1 gap-5 sm:grid-cols-3">
+            <div class="px-4 py-5 bg-white shadow rounded-lg overflow-hidden sm:p-6">
+                <dt class="text-sm font-medium text-gray-500 truncate">
+                    Total Issues
+                </dt>
+                <dd class="mt-1 text-3xl font-semibold text-gray-900">
+                    {{ issues|length }}
+                </dd>
+            </div>
+            
+            <div class="px-4 py-5 bg-white shadow rounded-lg overflow-hidden sm:p-6">
+                <dt class="text-sm font-medium text-gray-500 truncate">
+                    High Severity Issues
+                </dt>
+                <dd class="mt-1 text-3xl font-semibold text-red-600">
+                    {{ issues|selectattr('3', 'equalto', 'High')|list|length }}
+                </dd>
+            </div>
+            
+            <div class="px-4 py-5 bg-white shadow rounded-lg overflow-hidden sm:p-6">
+                <dt class="text-sm font-medium text-gray-500 truncate">
+                    Pages Tested
+                </dt>
+                <dd class="mt-1 text-3xl font-semibold text-gray-900">
+                    {{ screenshots|length }}
+                </dd>
+            </div>
+        </dl>
+    </div>
+</div>
+
+<!-- Screenshots -->
+<div class="bg-white shadow overflow-hidden sm:rounded-lg mb-6">
+    <div class="px-4 py-5 sm:px-6">
+        <h3 class="text-lg leading-6 font-medium text-gray-900">
+            Page Screenshots
+        </h3>
+        <p class="mt-1 max-w-2xl text-sm text-gray-500">
+            Visual representation of tested pages.
+        </p>
+    </div>
+    <div class="border-t border-gray-200">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
+            {% for link, screenshot in screenshots %}
+                <div class="border rounded-lg overflow-hidden">
+                    <div class="px-4 py-2 bg-gray-50 border-b">
+                        <h4 class="text-sm font-medium text-gray-700 truncate" title="{{ link }}">
+                            {{ link }}
+                        </h4>
+                    </div>
+                    <div class="p-4">
+                        {% if screenshot and screenshot|length > 0 %}
+                            <img src="{{ url_for('static', filename='screenshots/' + screenshot) }}" alt="Screenshot of {{ link }}" class="w-full h-auto">
+                        {% else %}
+                            <div class="flex items-center justify-center h-48 bg-gray-100 text-gray-500">
+                                No screenshot available
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Issues -->
+<div class="bg-white shadow overflow-hidden sm:rounded-lg">
+    <div class="px-4 py-5 sm:px-6">
+        <h3 class="text-lg leading-6 font-medium text-gray-900">
+            Detected Issues
+        </h3>
+        <p class="mt-1 max-w-2xl text-sm text-gray-500">
+            Detailed list of usability issues found during testing.
+        </p>
+    </div>
+    <div class="border-t border-gray-200">
+        {% if issues %}
+            <ul class="divide-y divide-gray-200">
+                {% for issue in issues %}
+                    {% set issue_name, page, desc, severity, screenshot = issue %}
+                    <li class="px-4 py-4 sm:px-6">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                {% if severity == "High" %}
+                                    <div class="flex-shrink-0 h-4 w-4 rounded-full bg-red-600"></div>
+                                    <p class="ml-2 text-sm font-medium text-gray-900">{{ severity }} Severity</p>
+                                {% elif severity == "Medium" %}
+                                    <div class="flex-shrink-0 h-4 w-4 rounded-full bg-yellow-500"></div>
+                                    <p class="ml-2 text-sm font-medium text-gray-900">{{ severity }} Severity</p>
+                                {% else %}
+                                    <div class="flex-shrink-0 h-4 w-4 rounded-full bg-green-500"></div>
+                                    <p class="ml-2 text-sm font-medium text-gray-900">{{ severity }} Severity</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <h4 class="text-lg font-medium text-gray-900">{{ issue_name }}</h4>
+                            <p class="mt-1 text-sm text-gray-600">{{ desc }}</p>
+                            <p class="mt-1 text-sm text-gray-500">Page: {{ page }}</p>
+                        </div>
+                        {% if screenshot and screenshot|length > 0 %}
+                            <div class="mt-3">
+                                <img src="{{ url_for('static', filename='screenshots/' + screenshot.split('/')[-1]) }}" alt="Issue screenshot" class="w-full max-w-lg h-auto">
+                            </div>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <div class="px-4 py-5 sm:px-6">
+                <div class="rounded-md bg-green-50 p-4">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-green-800">
+                                No issues detected
+                            </h3>
+                            <div class="mt-2 text-sm text-green-700">
+                                <p>
+                                    Great job! No usability issues were found during testing.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

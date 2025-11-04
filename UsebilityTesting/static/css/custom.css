@@ -1,0 +1,65 @@
+/* Custom styles beyond Tailwind */
+
+/* Fade-in animation for results */
+.fade-in {
+  animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #3B82F6;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #2563EB;
+}
+
+/* Custom file input styling */
+.file-input-label {
+  transition: all 0.3s ease;
+}
+
+.file-input-label:hover {
+  transform: translateY(-2px);
+}
+
+/* Severity badges */
+.severity-high {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: rgb(185, 28, 28);
+}
+
+.severity-medium {
+  background-color: rgba(245, 158, 11, 0.1);
+  color: rgb(180, 83, 9);
+}
+
+.severity-low {
+  background-color: rgba(16, 185, 129, 0.1);
+  color: rgb(6, 95, 70);
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .sidebar-hidden {
+    display: none;
+  }
+  
+  .mobile-menu-visible {
+    display: block;
+  }
+}
